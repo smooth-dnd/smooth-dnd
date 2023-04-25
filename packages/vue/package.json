@@ -59,7 +59,7 @@
     "vue": "^3.2.0"
   },
   "dependencies": {
-    "@smooth-dnd/core": "*"
+    "@smooth-dnd/core": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.16.0",
