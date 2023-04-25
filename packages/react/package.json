@@ -1,6 +1,6 @@
 {
   "name": "@smooth-dnd/react",
-  "description": "Drag and Drop library",
+  "description": "React wrapper for @smooth-dnd",
   "license": "MIT",
   "version": "0.1.0",
   "keywords": [
