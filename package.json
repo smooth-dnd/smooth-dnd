@@ -1,12 +1,11 @@
 {
   "name": "smooth-dnd",
-  "private": true,
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
     "build": "lerna run build",
     "test": "lerna run test",
-    "publish": "lerna publish",
+    "lerna": "lerna",
     "prettier": "prettier packages/**/*.{ts,tsx,js,json,vue} --write"
   },
   "dependencies": {
