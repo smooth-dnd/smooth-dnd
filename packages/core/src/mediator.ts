@@ -109,16 +109,18 @@ function getGhostElement(wrapperElement: HTMLElement, { x, y }: Position, contai
   ghost.style.pointerEvents = 'none'
   ghost.style.userSelect = 'none'
 
-  if (container.getOptions().dragClass) {
+  const { orientation, dragClass } = container.getOptions()
+  if (dragClass) {
     setTimeout(() => {
-      Utils.addClass(ghost.firstElementChild as HTMLElement, container.getOptions().dragClass!)
+      Utils.addClass(ghost.firstElementChild as HTMLElement, dragClass)
       const dragCursor = window.getComputedStyle(ghost.firstElementChild!).cursor
       cursorStyleElement = addCursorStyleToBody(dragCursor!)
     })
   } else {
     cursorStyleElement = addCursorStyleToBody(cursor)
   }
-  Utils.addClass(ghost, container.getOptions().orientation || 'vertical')
+
+  Utils.addClass(ghost, orientation || 'vertical')
   Utils.addClass(ghost, constants.ghostClass)
 
   return {
@@ -135,7 +137,7 @@ function getGhostElement(wrapperElement: HTMLElement, { x, y }: Position, contai
 function getDraggableInfo(draggableElement: HTMLElement): DraggableInfo {
   const container = containers.filter((p) => draggableElement.parentElement === p.element)[0]
   const draggableIndex = container.draggables.indexOf(draggableElement)
-  const getGhostParent = container.getOptions().getGhostParent
+  const { getGhostParent, getChildPayload, groupName } = container.getOptions()
   const draggableRect = draggableElement.getBoundingClientRect()
   return {
     container,
@@ -145,10 +147,10 @@ function getDraggableInfo(draggableElement: HTMLElement): DraggableInfo {
       offsetWidth: draggableRect.right - draggableRect.left,
     },
     elementIndex: draggableIndex,
-    payload: container.getOptions().getChildPayload ? container.getOptions().getChildPayload!(draggableIndex) : undefined,
+    payload: getChildPayload ? getChildPayload!(draggableIndex) : undefined,
     targetElement: null,
     position: { x: 0, y: 0 },
-    groupName: container.getOptions().groupName,
+    groupName: groupName,
     ghostParent: getGhostParent ? getGhostParent() : null,
     invalidateShadow: null,
     mousePosition: null!,
@@ -195,16 +197,17 @@ function handleDropAnimation(callback: Function) {
 
   if (draggableInfo.targetElement) {
     const container = containers.filter((p) => p.element === draggableInfo.targetElement)[0]
-    if (shouldAnimateDrop(container.getOptions())) {
+    const options = container.getOptions()
+    if (shouldAnimateDrop(options)) {
       const dragResult = container.getDragResult()!
-      animateGhostToPosition(dragResult.shadowBeginEnd.rect!, Math.max(150, container.getOptions().animationDuration! / 2), container.getOptions().dropClass)
+      animateGhostToPosition(dragResult.shadowBeginEnd.rect!, Math.max(150, options.animationDuration! / 2), options.dropClass)
     } else {
       endDrop()
     }
   } else {
     const container = containers.filter((p) => p === draggableInfo.container)[0]
     if (container) {
-      const { behavior, removeOnDropOut } = container.getOptions()
+      const { behavior, removeOnDropOut, animationDuration, dropClass } = container.getOptions()
       if ((behavior === 'move' || behavior === 'contain') && (isCanceling || !removeOnDropOut) && container.getDragResult()) {
         const rectangles = container.layout.getContainerRectangles()
 
@@ -216,8 +219,8 @@ function handleDropAnimation(callback: Function) {
               top: rectangles.lastVisibleRect.top,
               left: rectangles.lastVisibleRect.left,
             },
-            container.getOptions().animationDuration!,
-            container.getOptions().dropClass,
+            animationDuration!,
+            dropClass,
           )
         } else {
           const { removedIndex, elementSize } = container.getDragResult()!
@@ -233,10 +236,10 @@ function handleDropAnimation(callback: Function) {
             },
           })
           const prevDraggableEnd = removedIndex! > 0 ? layout.getBeginEnd(container.draggables[removedIndex! - 1]).end : layout.getBeginEndOfContainer().begin
-          animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd), container.getOptions().animationDuration!, container.getOptions().dropClass)
+          animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd), animationDuration!, dropClass)
         }
       } else {
-        disappearAnimation(container.getOptions().animationDuration!, endDrop)
+        disappearAnimation(animationDuration!, endDrop)
       }
     } else {
       // container is disposed due to removal
@@ -324,8 +327,7 @@ function onMouseDown(event: MouseEvent & TouchEvent) {
     if (grabbedElement) {
       const containerElement = Utils.getParent(grabbedElement, '.' + constants.containerClass)
       const container = containers.filter((p) => p.element === containerElement)[0]
-      const dragHandleSelector = container.getOptions().dragHandleSelector
-      const nonDragAreaSelector = container.getOptions().nonDragAreaSelector
+      const { dragHandleSelector, nonDragAreaSelector, dragClass, dragBeginDelay } =  container.getOptions()
 
       let startDrag = true
       if (dragHandleSelector && !Utils.getParent(e.target as Element, dragHandleSelector)) {
@@ -341,9 +343,17 @@ function onMouseDown(event: MouseEvent & TouchEvent) {
         Utils.addClass(window.document.body, constants.disableTouchActions)
         Utils.addClass(window.document.body, constants.noUserSelectClass)
 
+        if (dragClass) {
+          Utils.addClass(grabbedElement, dragClass)
+        }
+
         const onMouseUp = () => {
           Utils.removeClass(window.document.body, constants.disableTouchActions)
           Utils.removeClass(window.document.body, constants.noUserSelectClass)
+
+          if (grabbedElement && dragClass) {
+            Utils.removeClass(grabbedElement, dragClass)
+          }
 
           for (const e of releaseEvents) {
             window.document.removeEventListener(e, onMouseUp)
@@ -356,7 +366,7 @@ function onMouseDown(event: MouseEvent & TouchEvent) {
       }
 
       if (startDrag) {
-        handleDragStartConditions(e, container.getOptions().dragBeginDelay!, () => {
+        handleDragStartConditions(e, dragBeginDelay!, () => {
           Utils.clearSelection()
           initiateDrag(e, Utils.getElementCursor(event.target as Element)!)
           addMoveListeners()
@@ -409,10 +419,10 @@ function onMouseMove(event: MouseEvent & TouchEvent) {
   if (!draggableInfo) {
     initiateDrag(e, Utils.getElementCursor(event.target as Element)!)
   } else {
-    const containerOptions = draggableInfo.container.getOptions()
-    const isContainDrag = containerOptions.behavior === 'contain'
+    const { behavior, orientation } = draggableInfo.container.getOptions()
+    const isContainDrag = behavior === 'contain'
     if (isContainDrag) {
-      handleMouseMoveForContainer(e, containerOptions.orientation)
+      handleMouseMoveForContainer(e, orientation)
     } else if (sourceContainerLockAxis) {
       if (sourceContainerLockAxis === 'y') {
         ghostInfo.topLeft.y = e.clientY + ghostInfo.positionDelta.top
@@ -562,10 +572,12 @@ function initiateDrag(position: MousePosition, cursor: string) {
     isDragging = true
     const container = containers.filter((p) => grabbedElement!.parentElement === p.element)[0] as IContainer
     container.setDraggables()
-    sourceContainerLockAxis = container.getOptions().lockAxis ? (container.getOptions().lockAxis!.toLowerCase() as Axis) : null
+    const { lockAxis } = container.getOptions()
+    sourceContainerLockAxis = lockAxis ? (lockAxis.toLowerCase() as Axis) : null
 
     draggableInfo = getDraggableInfo(grabbedElement)
     ghostInfo = getGhostElement(grabbedElement, { x: position.clientX, y: position.clientY }, draggableInfo.container, cursor)
+
     draggableInfo.position = {
       x: position.clientX + ghostInfo.centerDelta.x,
       y: position.clientY + ghostInfo.centerDelta.y,
