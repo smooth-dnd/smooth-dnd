@@ -2,7 +2,7 @@
   "name": "@smooth-dnd/core",
   "description": "A drag and drop library",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "keywords": [
     "sortable",
     "drag and drop",
