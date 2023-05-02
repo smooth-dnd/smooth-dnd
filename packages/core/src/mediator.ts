@@ -343,10 +343,6 @@ function onMouseDown(event: MouseEvent & TouchEvent) {
         Utils.addClass(window.document.body, constants.disableTouchActions)
         Utils.addClass(window.document.body, constants.noUserSelectClass)
 
-        if (dragClass) {
-          Utils.addClass(grabbedElement, dragClass)
-        }
-
         const onMouseUp = () => {
           Utils.removeClass(window.document.body, constants.disableTouchActions)
           Utils.removeClass(window.document.body, constants.noUserSelectClass)
@@ -367,6 +363,10 @@ function onMouseDown(event: MouseEvent & TouchEvent) {
 
       if (startDrag) {
         handleDragStartConditions(e, dragBeginDelay!, () => {
+          if (dragClass) {
+            Utils.addClass(grabbedElement, dragClass)
+          }
+
           Utils.clearSelection()
           initiateDrag(e, Utils.getElementCursor(event.target as Element)!)
           addMoveListeners()
