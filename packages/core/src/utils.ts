@@ -196,28 +196,28 @@ export const getParent = (element: Element | null, selector: string) => {
 }
 
 export const hasClass = (element: HTMLElement, cls: string) => {
-  return (
-    element.className
-      .split(' ')
-      .map((p) => p)
-      .indexOf(cls) > -1
-  )
+  return Boolean(element?.classList.contains(cls))
 }
 
 export const addClass = (element: Element | null | undefined, cls: string) => {
   if (element) {
-    const classes = element.className.split(' ').filter((p) => p)
-    if (classes.indexOf(cls) === -1) {
-      classes.unshift(cls)
-      element.className = classes.join(' ')
+    const classes = cls.split(' ')
+    for (const cls of classes) {
+      if (!element.classList.contains(cls)) {
+        element.classList.add(cls)
+      }
     }
   }
 }
 
 export const removeClass = (element: HTMLElement, cls: string) => {
   if (element) {
-    const classes = element.className.split(' ').filter((p) => p && p !== cls)
-    element.className = classes.join(' ')
+    const classes = cls.split(' ')
+    for (const cls of classes) {
+      if (element.classList.contains(cls)) {
+        element.classList.remove(cls)
+      }
+    }
   }
 }
 
