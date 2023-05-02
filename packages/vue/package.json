@@ -66,5 +66,6 @@
     "typescript": "^5.0.4",
     "vite": "^4.3.2",
     "vue": "^3.2.0"
-  }
+  },
+  "gitHead": "db1e78e76ab33646cd6baae7d04f8b6117ce42d4"
 }

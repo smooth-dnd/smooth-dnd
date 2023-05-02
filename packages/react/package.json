@@ -67,5 +67,6 @@
   },
   "dependencies": {
     "@smooth-dnd/core": "^0.1.2"
-  }
+  },
+  "gitHead": "db1e78e76ab33646cd6baae7d04f8b6117ce42d4"
 }
