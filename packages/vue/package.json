@@ -2,7 +2,7 @@
   "name": "@smooth-dnd/vue",
   "description": "Vue wrapper for @smooth-dnd",
   "license": "MIT",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "keywords": [
     "Vue",
     "Vue.js",
@@ -65,7 +65,7 @@
     "vue": "^3.2.0"
   },
   "dependencies": {
-    "@smooth-dnd/core": "^0.1.2"
+    "@smooth-dnd/core": "^0.1.4"
   },
   "devDependencies": {
     "@types/node": "^18.16.0",
