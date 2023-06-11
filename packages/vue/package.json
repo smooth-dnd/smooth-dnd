@@ -48,8 +48,14 @@
   "module": "./dist/smooth-dnd-vue.mjs",
   "exports": {
     ".": {
-      "import": "./dist/smooth-dnd-vue.mjs",
-      "require": "./dist/smooth-dnd-vue.umd.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/smooth-dnd-vue.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/smooth-dnd-vue.umd.js"
+      }
     }
   },
   "files": [
